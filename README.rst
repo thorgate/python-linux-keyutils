@@ -24,13 +24,14 @@ This package uses rust and PyO3 to make system calls directly to the kernel.
 Usage
 ############
 
-```python
-import python_linux_keyutils
+Use following code snippet for inspiration::
 
-python_linux_keyutils.set_session_secret("secret_name","secret_value")
-python_linux_keyutils.get_session_secret("secret_name")
-python_linux_keyutils.invalidate_session_secret("secret_name")
-```
+  import python_linux_keyutils
+
+  python_linux_keyutils.set_session_secret("secret_name","secret_value")
+  python_linux_keyutils.get_session_secret("secret_name")
+  python_linux_keyutils.invalidate_session_secret("secret_name")
+
 
 ############
 Contributing
