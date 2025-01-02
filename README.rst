@@ -12,10 +12,10 @@ unsupported.
 Why?
 ####
 
-Existing `keyring https://pypi.org/project/keyring/` package is very powerful, but somewhat complex
+Existing `keyring <https://pypi.org/project/keyring/>`_ package is very powerful, but somewhat complex
 and heavy.
 
-`keyctl https://pypi.org/project/keyctl/` uses subprocess instead of system call, which introduces
+`keyctl <https://pypi.org/project/keyctl/>`_ uses subprocess instead of system call, which introduces
 possible points of failure and requires keyctl utility.
 
 This package uses rust and PyO3 to make system calls directly to the kernel.
@@ -26,12 +26,37 @@ Usage
 
 Use following code snippet for inspiration::
 
-  import python_linux_keyutils
+  from python_linux_keyutils import get_secret, set_secret, invalidate_secret, KeyRingIdentifier
 
-  python_linux_keyutils.set_session_secret("secret_name","secret_value")
-  python_linux_keyutils.get_session_secret("secret_name")
-  python_linux_keyutils.invalidate_session_secret("secret_name")
+  # By default, Session keyring is used
+  set_secret("test_key", b"test value")
+  print(get_secret("test_key"))
+  # b'test value'
 
+  # You can also specify a different keyring
+  set_secret("test_key_2", b"\0\0\0", key_ring=KeyRingIdentifier.User)
+  print(get_secret("test_key_2", key_ring=KeyRingIdentifier.User))
+  # b'\x00\x00\x00'
+
+  # set_secret doesn't automatically create keyring if it doesn't exist, but this can be changed with
+  # `create` keyword argument
+  set_secret("test_key_3", b"Hello kernel secrets", key_ring=KeyRingIdentifier.Process)
+  # Raises KeyError
+  set_secret("test_key_3", b"Hello kernel secrets", key_ring=KeyRingIdentifier.Process, create=True)
+  get_secret("test_key_3", key_ring=KeyRingIdentifier.Process)
+  # b'Hello kernel secrets'
+
+**********
+Exceptions
+**********
+
+The module may raise following exceptions
+
+- **OSError**: If system call fails due to access being denied, quota exceeded, bad address, write error, etc.
+- **ValueError**: If key name is invalid
+- **KeyError**: If key doesn't exist, or is expired, or keyring doesn't exist
+- **MemoryError**: If memory allocation fails
+- **RuntimeError**: If underlying rust library reports that operation is not supported
 
 ############
 Contributing
